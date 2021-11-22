@@ -24,6 +24,9 @@ float accel;
 float gyro;
 
 void setup() {
+  
+  Motors.initialise();
+  LineSensors.initialise();
 
   // Start the wire library for i2c.
   // Note: do not add this command into
