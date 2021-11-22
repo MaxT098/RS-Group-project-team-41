@@ -4,6 +4,7 @@ IMU-based electronic stability control for the 3pi+ Romi
 Here lies our meeting notes and objectives:
 
 **Week 8:**
+
 Objective for project: first step, IMU-assisted line following challenge, where line sensors serve as the initial reference point for it to follow a straight line, if the line sensors don't detect a line, then use IMU readings to adjust motor output and rotation to make it detect lines again -> measures the time when a line is not detected -> normal and slippery surfaces 
 
 Alternative objective: second step, if that works, then move onto IMU being the sole reference point for the Romi to travel in a straight line (in reality you don’t have a straight line to guide the car!), the black line, therefore, only serves as a measurement of whether the Romi is travelling in a straight line, detection of a black line means it is travelling in a straight line, failing to detect one means that it is travelling off a straight line. 
