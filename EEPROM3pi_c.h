@@ -11,7 +11,7 @@ class EEPROM3pi_c {
 #define BUTTON_A_PIN  14
 #define BUTTON_B_PIN  30
 
-    byte grid[2][20];
+    float grid[2][20];
 
     // Constructor, must exist.
     EEPROM3pi_c() {
@@ -50,7 +50,7 @@ class EEPROM3pi_c {
         for ( x = 0; x < 2; x++ ) {
 
           // Get a bye at address from EEPROM
-          byte value = EEPROM.read( address );
+          float value = EEPROM.read( address );
 
           // Print as output
           Serial.print( value );

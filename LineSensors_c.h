@@ -9,9 +9,7 @@ class LineSensors_c {
 #define LS_RIGHT_IN_PIN   21
 #define tout              2500
 #define NB_LS_PINS        3
-#define Kp                255
-#define Ki                0.0000001
-#define Kd                0.001
+
 #include <math.h>
 
     int elapsed_t[NB_LS_PINS] = {};

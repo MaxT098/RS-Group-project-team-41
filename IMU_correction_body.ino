@@ -28,6 +28,7 @@ PID_c HPID;
 #define STATE_ONLINE    1
 
 int state;                          // This will hold which state your robot is in
+unsigned long posttime;             // Timer for background x-position mapping
 
 
 // put your setup code here, to run once:
@@ -52,15 +53,6 @@ void setup() {
   Serial.begin(9600);
   delay(1000);
   Serial.println("***Setup Complete***");
-
-  // Setup our grid in volatile memory
-  // as if it had been data collected
-  // by the robot.
-  int y;
-  for ( y = 0; y < 20; y++ ) {
-    EPRM.grid[0][y] = 88;           // replace 88 with x-positional data here
-    EPRM.grid[1][y] = 77;           // replace 77 with y-positional data here
-  }
 
   // Wait for a button press to decide
   // what to do.
@@ -94,6 +86,7 @@ void setup() {
     }
   } else {
     Serial.println("Starting experiment");
+    posttime = millis();
   }
 
   state == STATE_ONLINE;
@@ -107,6 +100,9 @@ void loop() {
   // flow control is managed in updateState()
   updateState();
 
+  // Background writing coordinates to grid
+  writetogrid();
+  
   // This is the basic structure for a FSM  Based on the value
   // of "state" variable, run appropriate code for robot behaviour.
   if ( state == STATE_ONLINE ) {
@@ -148,6 +144,29 @@ void updateState() {
   //Serial.println(state);
 }
 
+void writetogrid () {
+  // Setup our grid in volatile memory
+  // as if it had been data collected
+  // by the robot.
+  unsigned long gridwrite;
+  unsigned long gride_t;
+  float gridd_t;
+  float calc;
+
+  gridwrite = millis();
+  gride_t = gridwrite - posttime;
+  gridd_t = (float)gride_t;
+  
+  int y;
+  for ( y = 0; y < 20; y++ ) {
+    if (gridd_t > 500) {
+      EPRM.grid[0][y] = 1.5 * calc * (gridd_t * gridd_t);
+      EPRM.grid[1][y] = gridd_t;
+      posttime = millis(); 
+    }
+  }
+}
+
 // write this function to have your
 // robot beep 5 times, across a total
 // of 5 seconds.
@@ -176,6 +195,7 @@ void LFB() {
   float Eline;
 
   LFBmeasurement = LS.LSRead();
+  LFPID.PIDreset(255, 0.001, 0.001);                //set PID terms for LFB and reset variables in PID
   Eline = LFPID.PIDupdate(LFBdemand, LFBmeasurement);
 
   MTR.setLeftMotorPower(MOTOR_PWR - Eline);
@@ -200,6 +220,7 @@ void Xposition() {
   e_dt = (float)e_t;
 
   calc = IMUX.iaccel();
+  
   xposmeasurement = 1.5 * calc * (e_dt * e_dt);
   
   if (xposmeasurement < 0) {
@@ -207,9 +228,42 @@ void Xposition() {
   } else if (xposmeasurement > 0) {
     xposdemand = -xposmeasurement;
   }
-  
+
+  XPPID.PIDreset(255, 0.001, 0.001);                  //set PID terms for x-pos and reset variables in PID
   xEline = XPPID.PIDupdate(xposdemand, xposmeasurement);
   
   MTR.setLeftMotorPower(MOTOR_PWR - xEline);
   MTR.setRightMotorPower(MOTOR_PWR + xEline);
+}
+
+void Hangle() {
+  float calc;
+  float HAmeasurement;
+  float HAdemand;
+  float hEline;
+  unsigned long now_t;
+  unsigned long last_t;
+  unsigned long e_t;
+  float e_dt;
+
+  now_t = millis();
+  e_t = now_t - last_t;
+
+  e_dt = (float)e_t;
+
+  calc = IMUX.igyro();
+  
+  HAmeasurement = calc * e_dt;
+  
+  if (HAmeasurement < 0) {
+    HAdemand = -HAmeasurement;
+  } else if (HAmeasurement > 0) {
+    HAdemand = -HAmeasurement;
+  }
+
+  HPID.PIDreset(255, 0.001, 0.001);                  //set PID terms for HA and reset variables in PID
+  hEline = HPID.PIDupdate(HAdemand, HAmeasurement);
+  
+  MTR.setLeftMotorPower(MOTOR_PWR - hEline);
+  MTR.setRightMotorPower(MOTOR_PWR + hEline);
 }
