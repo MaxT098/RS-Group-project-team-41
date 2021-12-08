@@ -25,12 +25,13 @@ class PID_c {
     }
     
     void PIDreset (float a, float b, float c) {
+      
       inter = 0;
       Pterm = 0;
       Iterm = 0;
       Dterm = 0;
       feedback = 0;
-      preverror = 0;
+      preverror = 0;       
       Kp = a;
       Ki = b;
       Kd = c;
