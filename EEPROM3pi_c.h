@@ -11,7 +11,7 @@ class EEPROM3pi_c {
 #define BUTTON_A_PIN  14
 #define BUTTON_B_PIN  30
 
-    float grid[2][20];
+    float grid[20];
 
     // Constructor, must exist.
     EEPROM3pi_c() {
@@ -22,44 +22,39 @@ class EEPROM3pi_c {
     // uses a consistent method to
     // get the data back out.
     void writeGridToEEPROM() {
-      int x, y, address;
+      int x, address;
 
       address = 0;
-      for ( y = 0; y < 20; y++ ) {
-        for ( x = 0; x < 2; x++ ) {
+
+        for ( x = 0; x < 20; x++ ) {
 
           // Update will only write to the EEPROM
           // if the value has changed.  This should
           // help the EEPROM to stay working for
           // longer.
-          EEPROM.update( address, grid[x][y] );
+          EEPROM.update( address, grid[x] );
 
           address++; // adds 1 to address
         }
-      }
-
     }
 
     // Serial prints the contents of
     // EEPROM
     void readFromEEPROM() {
-      int x, y, address;
+      int x, address;
 
       address = 0;
-      for ( y = 0; y < 20; y++ ) {
-        for ( x = 0; x < 2; x++ ) {
+
+        for ( x = 0; x < 20; x++ ) {
 
           // Get a bye at address from EEPROM
           float value = EEPROM.read( address );
 
           // Print as output
           Serial.print( value );
-          Serial.print(",");
+          Serial.print("\n");
           address++; // adds 1 to address
         }
-        // Newline after print a row
-        Serial.print("\n");
-      }
       //Done.
       Serial.println("***********\n");
     }

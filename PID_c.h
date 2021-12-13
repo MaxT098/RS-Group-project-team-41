@@ -63,7 +63,7 @@ class PID_c {
 
       preverror = error;
       
-      feedback = Pterm;// + Iterm;// + Dterm;
+      feedback = Pterm + Iterm + Dterm;
 
       //Serial.print(Pterm);
       //Serial.print(",");
