@@ -101,6 +101,7 @@ void loop() {
   // Background writing coordinates to grid
   writetogrid();
 
+
   Serial.println(grid_address);
 
   // This is the basic structure for a FSM  Based on the value
@@ -116,14 +117,24 @@ void loop() {
     
     Xposition();
     
-  } else if ( state == STATE_FINISH ) {
+  } else if ( state == STATE_FINISH  ) {
     while (1) {
       MTR.setLeftMotorPower(0);
       MTR.setRightMotorPower(0);
-      //reportResultsOverSerial();
+      reportResultsOverSerial();
     }
   } else {
     Serial.println("Something went wrong");
+  }
+
+  // Can't store more data. Stop and report.
+  if( grid_address >= RESULTS_NUM ) {
+    while (1) {
+      MTR.setLeftMotorPower(0);
+      MTR.setRightMotorPower(0);
+      reportResultsOverSerial();
+      delay(1000);
+    }
   }
 }
 
