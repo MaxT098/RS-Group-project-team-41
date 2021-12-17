@@ -3,8 +3,8 @@
 #include <Wire.h>
 #include <LSM6.h>
 
-#define gyrofilter -0.634166667
-#define accelfilter 0.060966667
+#define gyrofilter  1 //0.913140496
+#define accelfilter 0.2 //0.125120192
 
 class Imux_c {
   public:
@@ -42,14 +42,22 @@ class Imux_c {
 
     float igyro () {
       imu.read();
-      gyro = (imu.g.z * 8.75 / 1000 - gyrofilter);
-      return gyro;
+      gyro = (imu.g.z * 8.75 / 1000);
+      if (abs(gyro) > gyrofilter) {
+        return gyro;
+      } else {
+        return 0;
+      }
     }
 
     float iaccel () {
       imu.read();
-      accel = (imu.a.y * 0.061 / 1000 * 9.81 - accelfilter);
-      return accel;
+      accel = (imu.a.y * 0.061 / 1000 * 9.81);
+      if (abs(accel) > accelfilter) {
+        return accel;
+      } else {
+        return 0;
+      }
     }
 };
 #endif

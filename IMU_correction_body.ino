@@ -16,7 +16,7 @@
 #define BUTTON_A_PIN        14      // Push buttons connected to:
 #define BUTTON_B_PIN        30
 
-#define RESULTS_NUM         80      // Results grid size
+#define RESULTS_NUM         95      // Results grid size
 
 Motors_c MTR;                       // Create instances of classes
 LineSensors_c LS;
@@ -102,7 +102,7 @@ void loop() {
   writetogrid();
 
 
-  Serial.println(grid_address);
+  //Serial.println(grid_address);
 
   // This is the basic structure for a FSM  Based on the value
   // of "state" variable, run appropriate code for robot behaviour.
@@ -121,7 +121,7 @@ void loop() {
     while (1) {
       MTR.setLeftMotorPower(0);
       MTR.setRightMotorPower(0);
-      reportResultsOverSerial();
+      //reportResultsOverSerial();
     }
   } else {
     Serial.println("Something went wrong");
@@ -155,13 +155,13 @@ void updateState() {
 
     last_t = millis();
 
-    XPPID.PIDreset(0.4, 0.001, 0.001);                  //set PID terms for x-pos and reset variables in PID
+    //XPPID.PIDreset(0.4, 0.001, 0.001);                  //set PID terms for x-pos and reset variables in PID (Redundant! Don't use or mention it in the report!)
 
   } else if ( (a >= LINE_THRESHOLD || b >= LINE_THRESHOLD || c >= LINE_THRESHOLD ) && state != STATE_ONLINE ) {
 
     state = STATE_ONLINE;
 
-    LFPID.PIDreset(50, 0.001, 0.001);                   //set PID terms for LFB and reset variables in PID
+    LFPID.PIDreset(50, 0.001, 0.001);                   //set PID terms for LFB and reset variables in PID, in the order Kp, Ki and Kd
   } //else if (grid_address = RESULTS_NUM /*&& (a < LINE_THRESHOLD && b < LINE_THRESHOLD && c < LINE_THRESHOLD) && state != STATE_FINISH*/) {
     //state = STATE_FINISH;
   //}
@@ -179,11 +179,11 @@ void writetogrid () {
   float xpos;
 
   calc = IMUX.iaccel();    
-  xpos = 1.5 * calc * ((UPDATE_MS / 1000) ^ 2);
+  xpos = calc * 0.1;
 
   if ( millis() - posttime > UPDATE_MS && grid_address < RESULTS_NUM) {
     posttime = millis();
-
+    
     results[grid_address] = xpos;      //change this to write to a grid
 
     grid_address += 1;
@@ -248,7 +248,7 @@ void Xposition() {
   e_dt = (float)e_t;
 
   xposmeasurement = IMUX.iaccel();   //change this term to switch correction modes! Seems like need to adjust motor input direction for gyro
-
+  
   float alpha = 0.9;
   
   // Paul: with alpha=0.9, this will mean we "trust" old
@@ -269,11 +269,11 @@ void Xposition() {
   }
 
   if (corr <= 0) {
-    MTR.setLeftMotorPower(MOTOR_PWR - (corr * 2.5));
-    MTR.setRightMotorPower(MOTOR_PWR - corr);
+    MTR.setLeftMotorPower(MOTOR_PWR - (corr * 3)); //AA:0.2 LA:3
+    MTR.setRightMotorPower(MOTOR_PWR);
   } else {
-    MTR.setLeftMotorPower(MOTOR_PWR + corr);
-    MTR.setRightMotorPower(MOTOR_PWR + (corr * 2.5));
+    MTR.setLeftMotorPower(MOTOR_PWR);
+    MTR.setRightMotorPower(MOTOR_PWR + (corr * 3));
   }
   
   // (Probably don't need this now because we are using a different correction algorithm, see above)
